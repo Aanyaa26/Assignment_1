@@ -1,22 +1,28 @@
-version: "3.8"
-
 services:
-  fastapi:
-    build: .
-    container_name: fastapi_app
-    ports:
-      - "8000:8000"
-    depends_on:
-      - mysql
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:root123@mysql/temp
-
   mysql:
     image: mysql:8
     container_name: mysql_db
     restart: always
-    env_file:
-      - .env
-    ports:
-      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: temp
+    volumes:
+      - mysql_data:/var/lib/mysql
 
+  fastapi:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8001:8000"
+      - "5678:5678"
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: root123
+      DB_PORT: 3306
+      DB_NAME: temp
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:

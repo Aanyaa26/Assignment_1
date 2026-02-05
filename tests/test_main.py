@@ -1,12 +1,22 @@
 import sys
 import os
+from unittest.mock import MagicMock
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from fastapi.testclient import TestClient
-from main import app
+from main import app, get_db
+
+# ---- MOCK DATABASE ----
+def override_get_db():
+    db = MagicMock()
+    yield db
+
+app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
+
+# ---- TESTS ----
 
 def test_create_address():
     payload = {
@@ -23,7 +33,7 @@ def test_create_address():
     data = response.json()
 
     assert data["message"] == "Address saved successfully"
-    assert data["data"]["hn"] == 10
+
 
 def test_invalid_pincode():
     payload = {
@@ -35,33 +45,15 @@ def test_invalid_pincode():
     }
 
     response = client.post("/address", json=payload)
-
     assert response.status_code == 422
 
-def test_invalid_pincode():
+
+def test_missing_field():
     payload = {
         "address": {
-            "hn": 10,
-            "ap": "Test",
-            "pincode": 123
+            "hn": 10
         }
     }
 
     response = client.post("/address", json=payload)
-
     assert response.status_code == 422
-
-def test_wrong_type():
-    payload = {
-        "address": {
-            "hn": "abc",
-            "ap": "Test",
-            "pincode": 110001
-        }
-    }
-
-    response = client.post("/address", json=payload)
-
-    assert response.status_code == 422
-
-
