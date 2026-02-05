@@ -24,3 +24,44 @@ def test_create_address():
 
     assert data["message"] == "Address saved successfully"
     assert data["data"]["hn"] == 10
+
+def test_invalid_pincode():
+    payload = {
+        "address": {
+            "hn": 10,
+            "ap": "Test",
+            "pincode": 123
+        }
+    }
+
+    response = client.post("/address", json=payload)
+
+    assert response.status_code == 422
+
+def test_invalid_pincode():
+    payload = {
+        "address": {
+            "hn": 10,
+            "ap": "Test",
+            "pincode": 123
+        }
+    }
+
+    response = client.post("/address", json=payload)
+
+    assert response.status_code == 422
+
+def test_wrong_type():
+    payload = {
+        "address": {
+            "hn": "abc",
+            "ap": "Test",
+            "pincode": 110001
+        }
+    }
+
+    response = client.post("/address", json=payload)
+
+    assert response.status_code == 422
+
+
